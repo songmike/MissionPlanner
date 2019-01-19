@@ -473,7 +473,7 @@ namespace MissionPlanner.GCSViews
             if (CB_tuning.Checked)
                 ZedGraphTimer.Start();
 
-            hud1.altunit = CurrentState.DistanceUnit;
+            hud1.altunit = CurrentState.AltUnit;
             hud1.speedunit = CurrentState.SpeedUnit;
             hud1.distunit = CurrentState.DistanceUnit;
 
@@ -1292,7 +1292,7 @@ namespace MissionPlanner.GCSViews
 
                             
                             // cleanup old - no markers where added, so remove all old 
-                            if (MainV2.comPort.MAV.camerapoints.Count == 0)
+                            if (MainV2.comPort.MAV.camerapoints.Count < photosoverlay.Markers.Count)
                                 photosoverlay.Markers.Clear();
 
                             var min_interval = 0.0;

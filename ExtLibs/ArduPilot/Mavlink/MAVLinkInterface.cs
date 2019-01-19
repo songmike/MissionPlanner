@@ -3838,8 +3838,24 @@ Please check the following
                             MAVlist.Create(sysid, compid);
                             MAVlist[sysid, compid].aptype = MAV_TYPE.ONBOARD_CONTROLLER;
                             MAVlist[sysid, compid].apname = MAV_AUTOPILOT.INVALID;
+                            MAVlist[sysid, compid].CANNode = true;
                             setAPType(sysid, compid);
+
+                            // new device, so request node info
+                            doCommand(sysid, compid, MAV_CMD.UAVCAN_GET_NODE_INFO, 0, 0, 0, 0, 0, 0, 0, false);
                         }
+                    }
+
+                    if (msgid == (uint) MAVLINK_MSG_ID.UAVCAN_NODE_INFO)
+                    {
+                        var cannode = message.ToStructure<mavlink_uavcan_node_info_t>();
+
+                        var name = ASCIIEncoding.ASCII.GetString(cannode.name);
+
+                        MAVlist[sysid, compid].VersionString = name;
+
+                        MAVlist[sysid, compid].SoftwareVersions =
+                            cannode.sw_version_major + "." + cannode.sw_version_minor;
                     }
 
                     // set seens sysid's based on hb packet - this will hide 3dr radio packets ( which send a RADIO_STATUS, but not a HEARTBEAT )
@@ -4178,6 +4194,8 @@ Please check the following
                 if (MAVlist[sysid, compid].camerapoints.Count == 0 ||
                     MAVlist[sysid, compid].camerapoints.Last().time_usec != camerapt.time_usec)
                 {
+                    MAVlist[sysid, compid].camerapoints.RemoveAll(a =>
+                        a.cam_idx * 256 + a.img_idx == camerapt.cam_idx * 256 + camerapt.img_idx);
                     MAVlist[sysid, compid].camerapoints.Add(camerapt);
                 }
             }
